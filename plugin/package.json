@@ -1,5 +1,5 @@
 {
-  "name": "dsh-pocket",
+  "name": "dsh-pocket-broadband",
   "description": "把 DeepSeek Harness 装进你的口袋：一个包、一个设置页，手机扫码即同步访问电脑上的 DSH（局域网 + 公网，实时同屏）。",
   "type": "module",
   "main": "lib/index.js",
@@ -11,7 +11,9 @@
       "default": "./lib/index.js"
     },
     "./client": "./client/client.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
   },
   "files": [
     "bin",
@@ -19,7 +21,9 @@
     "client",
     "cordis.patch.yml",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "locale",
+    "icon.svg"
   ],
   "scripts": {
     "build:client": "node client/build.mjs",
@@ -32,11 +36,7 @@
     "qrcode-terminal": "^0.12.0"
   },
   "devDependencies": {
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
-    "esbuild": "^0.25.9",
-    "semantic-release": "^24.2.9",
-    "ws": "^8.18.0"
+    "esbuild": "^0.25.9"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1"
@@ -71,12 +71,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shaobeichen/dsh-pocket.git"
+    "url": "git+https://github.com/ghost-xx/dsh-pocket-broadband.git",
+    "directory": "plugin"
   },
   "bugs": {
-    "url": "https://github.com/shaobeichen/dsh-pocket/issues"
+    "url": "https://github.com/ghost-xx/dsh-pocket-broadband/issues"
   },
-  "homepage": "https://github.com/shaobeichen/dsh-pocket",
+  "homepage": "https://github.com/ghost-xx/dsh-pocket-broadband",
+  "private": true,
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"

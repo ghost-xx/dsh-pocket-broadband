@@ -1,5 +1,5 @@
 window.__ModuleLoader__.load({
-  id: "dsh-pocket",
+  id: "dsh-pocket-broadband",
   factory: (require) => {
     var module = { exports: {} };
     var exports = module.exports;
@@ -112,6 +112,7 @@ function redactStatus(s) {
     tunnelRunning: s?.tunnelRunning === true,
     tunnelUrl: s?.tunnelUrl ?? null,
     tunnelQr: s?.tunnelQr ?? null,
+    // Tailscale 入口（同 tailnet 内点对点直连；未装/未登录时为 null）
     tailscaleUrl: s?.tailscaleUrl ?? null,
     tailscaleQr: s?.tailscaleQr ?? null,
     tunnelState: s?.tunnelState ?? { phase: "idle" },
@@ -986,7 +987,7 @@ var MOBILE_CSS = `
     line-height: 1.45;
   }
   /* DSH 0.2.2-rc.1 regression: on a phone-sized viewport the shell writes its
-     grid inline as "100vw 0 0" — the drawer's own full width lands in the
+     grid inline as "100vw 0 0" \u2014 the drawer's own full width lands in the
      sidebar column, so the centre column (conversation + composer) collapses
      to 0px and slides off the right edge, leaving a black page. The sidebar is
      absolutely positioned at this width, so its column never needs to reserve
@@ -2057,7 +2058,21 @@ var zh2 = {
   "updatedRestartDetail": "\u2705 \u5DF2\u66F4\u65B0\uFF0C\u91CD\u542F dsh web \u751F\u6548",
   "updateFailed": "\u274C \u5931\u8D25\uFF1A{err}\uFF08\u624B\u52A8\u66F4\u65B0\uFF1Adsh plugin --profile web update dsh-pocket --latest -w\uFF09",
   "versionRange": "\u5F53\u524D v{cur} \u2192 \u6700\u65B0 v{latest}",
-  "wanAccess": "\u516C\u7F51\u8BBF\u95EE",
+  "wanAccess": "Cloudflare \u96A7\u9053\u8BBF\u95EE",
+  "broadbandTitle": "\u5BBD\u5E26\u516C\u7F51\u76F4\u8FDE",
+  "broadbandIntro": "\u4F7F\u7528\u7535\u8111\u5BBD\u5E26\u7684\u516C\u7F51 IP \u76F4\u63A5\u8BBF\u95EE\uFF0C\u4E0D\u7ECF\u8FC7 Cloudflare\u3002\u6BCF\u5206\u949F\u81EA\u52A8\u68C0\u67E5 IP\uFF0C\u4E5F\u53EF\u624B\u52A8\u5237\u65B0\u3002",
+  "broadbandLoading": "\u6B63\u5728\u83B7\u53D6\u2026",
+  "broadbandRefresh": "\u5237\u65B0\u516C\u7F51 IP",
+  "broadbandFailed": "\u83B7\u53D6\u5931\u8D25\uFF0C\u8BF7\u91CD\u8BD5\u3002",
+  "broadbandQrHint": "\u626B\u7801\u4F7F\u7528\u5BBD\u5E26\u76F4\u8FDE\uFF1BIP \u53D8\u5316\u540E\u8BF7\u4F7F\u7528\u65B0\u5730\u5740\u3002",
+  "broadbandOpen": "\u6253\u5F00\u76F4\u8FDE\u5730\u5740",
+  "broadbandCopy": "\u590D\u5236\u5730\u5740",
+  "broadbandCopied": "\u5730\u5740\u5DF2\u590D\u5236",
+  "broadbandCopyFailed": "\u590D\u5236\u5931\u8D25\uFF0C\u8BF7\u9009\u4E2D\u4E0A\u65B9\u5730\u5740\u624B\u52A8\u590D\u5236",
+  "broadbandChecked": "\u4E0A\u6B21\u68C0\u67E5\uFF1A",
+  "broadbandPassword": "\u516C\u7F51\u8BBF\u95EE\u5BC6\u7801",
+  "broadbandPasswordHint": "\u4E0E Cloudflare \u96A7\u9053\u5171\u7528\u516C\u7F51\u5BC6\u7801\uFF0C\u5173\u95ED\u96A7\u9053\u540E\u4ECD\u53EF\u76F4\u8FDE\u3002",
+  "broadbandRequirement": "\u4EC5\u83B7\u53D6\u5730\u5740\u4E0D\u4EE3\u8868\u5916\u7F51\u5DF2\u8FDE\u901A\u3002\u9700\u8981\u5BBD\u5E26\u5177\u6709\u516C\u7F51 IPv4\uFF0C\u8DEF\u7531\u5668\u5C06\u6B64\u7AEF\u53E3\u8F6C\u53D1\u5230\u7535\u8111\uFF0C\u4E14\u9632\u706B\u5899\u653E\u884C\u3002\u6B64\u5165\u53E3\u4F7F\u7528 HTTP\u3002",
   "pinLabel": "\u8BBF\u95EE\u5BC6\u7801",
   "modeLabel": "\u5730\u5740\u6A21\u5F0F",
   "advAddress": "\u9AD8\u7EA7 \xB7 \u624B\u52A8\u9009\u5730\u5740",
@@ -2073,9 +2088,9 @@ var zh2 = {
   "lanTitle": "\u{1F4F6} \u5C40\u57DF\u7F51\uFF08\u540C\u4E00 WiFi\uFF09",
   "lanHint": "\u624B\u673A\u8FDE\u63A5\u540C\u4E00 WiFi \u540E\u626B\u7801\u5373\u53EF\u6253\u5F00",
   "lanAccess": "\u5C40\u57DF\u7F51\u8BBF\u95EE",
-  "tailscaleAccess": "Tailscale 直连",
-  "tailscaleP2P": "点对点 · 免公网",
-  "tailscaleHint": "手机与电脑登录同一 Tailscale 账号后扫码（跨网也点对点，速度接近局域网）",
+  "tailscaleAccess": "Tailscale \u76F4\u8FDE",
+  "tailscaleP2P": "\u70B9\u5BF9\u70B9 \xB7 \u514D\u516C\u7F51",
+  "tailscaleHint": "\u624B\u673A\u4E0E\u7535\u8111\u767B\u5F55\u540C\u4E00 Tailscale \u8D26\u53F7\u540E\u626B\u7801\uFF08\u8DE8\u7F51\u4E5F\u70B9\u5BF9\u70B9\uFF0C\u901F\u5EA6\u63A5\u8FD1\u5C40\u57DF\u7F51\uFF09",
   "lanDisabledHint": "\u{1F512} \u5C40\u57DF\u7F51\u8BBF\u95EE\u5DF2\u5173\u95ED\uFF1A\u624B\u673A\u626B\u7801/\u94FE\u63A5\u5747\u4E0D\u53EF\u7528\uFF08\u516C\u7F51\u4E0D\u53D7\u5F71\u54CD\uFF09\u3002\u70B9\u300C\u5F00\u300D\u6062\u590D\u3002",
   "lanToggleTitleOff": "\u5173\u95ED\u5C40\u57DF\u7F51\u8BBF\u95EE",
   "lanToggleBodyOff": "\u5173\u95ED\u540E\uFF0C\u540C\u4E00 WiFi \u4E0B\u7684\u624B\u673A\u5C06\u65E0\u6CD5\u626B\u7801\u8BBF\u95EE\uFF08\u5C40\u57DF\u7F51\u4E8C\u7EF4\u7801/\u94FE\u63A5\u7ACB\u5373\u5931\u6548\uFF09\u3002\u516C\u7F51\u8BBF\u95EE\u4E0D\u53D7\u5F71\u54CD\u3002\u786E\u5B9A\u5173\u95ED\uFF1F",
@@ -2158,7 +2173,21 @@ var en2 = {
   "updatedRestartDetail": "\u2705 Updated \u2014 restart dsh web to apply",
   "updateFailed": "\u274C Failed: {err} (manual update: dsh plugin --profile web update dsh-pocket --latest -w)",
   "versionRange": "Current v{cur} \u2192 latest v{latest}",
-  "wanAccess": "Public access",
+  "wanAccess": "Cloudflare tunnel access",
+  "broadbandTitle": "Broadband public IP access",
+  "broadbandIntro": "Connect directly through this computer\u2019s broadband IP, without Cloudflare. Checked every minute or on refresh.",
+  "broadbandLoading": "Checking\u2026",
+  "broadbandRefresh": "Refresh public IP",
+  "broadbandFailed": "Could not get the IP. Please retry.",
+  "broadbandQrHint": "Scan to connect directly. Use the new address after the IP changes.",
+  "broadbandOpen": "Open direct address",
+  "broadbandCopy": "Copy address",
+  "broadbandCopied": "Address copied",
+  "broadbandCopyFailed": "Copy failed. Select the address above to copy it manually.",
+  "broadbandChecked": "Last checked:",
+  "broadbandPassword": "Public access password",
+  "broadbandPasswordHint": "Shares the public password with the Cloudflare tunnel. Direct access works while the tunnel is off.",
+  "broadbandRequirement": "Detecting an IP does not verify external connectivity. Requires public IPv4, router port forwarding to this computer, and firewall access. This entrance uses HTTP.",
   "pinLabel": "Access PIN",
   "modeLabel": "Address mode",
   "advAddress": "Advanced \xB7 Pick address",
@@ -2266,6 +2295,9 @@ function applyMobileRightbarSetting(enabled) {
 }
 function PocketSettingsTab({ rpcCall, t }) {
   const [status, setStatus] = (0, import_react2.useState)(null);
+  const [broadband, setBroadband] = (0, import_react2.useState)(null);
+  const [broadbandBusy, setBroadbandBusy] = (0, import_react2.useState)(false);
+  const broadbandInFlight = (0, import_react2.useRef)(false);
   const [busy, setBusy] = (0, import_react2.useState)(false);
   const [error, setError] = (0, import_react2.useState)(null);
   const [tunnelState, setTunnelState] = (0, import_react2.useState)(null);
@@ -2283,6 +2315,24 @@ function PocketSettingsTab({ rpcCall, t }) {
     if (!res?.ok) throw new Error(res?.error?.message ?? "RPC failed");
     return res.value;
   };
+  const loadBroadband = async (refresh = false) => {
+    if (broadbandInFlight.current) return;
+    broadbandInFlight.current = true;
+    setBroadbandBusy(true);
+    try {
+      setBroadband(await call(refresh ? "broadband/refresh" : "broadband/status", {}));
+    } catch (err) {
+      setBroadband({ error: err?.message || "RPC failed" });
+    } finally {
+      broadbandInFlight.current = false;
+      setBroadbandBusy(false);
+    }
+  };
+  (0, import_react2.useEffect)(() => {
+    loadBroadband();
+    const timer = setInterval(() => loadBroadband(), 6e4);
+    return () => clearInterval(timer);
+  }, []);
   const load = async () => {
     try {
       const s = await call(POCKET_ENDPOINTS.status, {});
@@ -2513,7 +2563,7 @@ function PocketSettingsTab({ rpcCall, t }) {
     { style: { marginTop: 6, fontSize: 12, color: "var(--dsw-alias-label-secondary,#6b7280)", lineHeight: 1.5 } },
     t("customizing"),
     (0, import_react2.createElement)("input", {
-      style: { width: 130, margin: "0 6px", padding: "4px 8px", fontSize: 14, letterSpacing: 1, textAlign: "center", border: "1px solid var(--dsw-alias-border-l2,#d1d5db)", borderRadius: 6, outline: "none" },
+      style: { width: 130, margin: "0 6px", padding: "4px 8px", fontSize: 14, letterSpacing: 1, textAlign: "center", border: "1px solid var(--dsw-alias-border-l2)", borderRadius: 6, background: "var(--dsw-alias-bg-layer-1)", color: "var(--dsw-alias-label-primary)", outlineColor: "var(--dsw-alias-brand-primary)" },
       type: "password",
       minLength: 8,
       maxLength: 64,
@@ -2702,7 +2752,55 @@ function PocketSettingsTab({ rpcCall, t }) {
         )
       ) : (0, import_react2.createElement)("div", { style: styles.muted }, t("lanStarting"))
     ),
-    // Tailscale：只有装了并登录同一 tailnet 才出现；跨网点对点直连，比 cloudflared 快
+    // 宽带地址由宿主查询，避免显示手机自身的出口 IP。
+    (0, import_react2.createElement)(
+      "section",
+      { style: styles.block, "aria-label": t("broadbandTitle") },
+      (0, import_react2.createElement)(
+        "div",
+        { style: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 } },
+        (0, import_react2.createElement)("strong", { style: { fontSize: 13 } }, t("broadbandTitle")),
+        (0, import_react2.createElement)("button", { style: styles.btn, disabled: broadbandBusy, onClick: () => loadBroadband(true) }, broadbandBusy ? t("broadbandLoading") : t("broadbandRefresh"))
+      ),
+      (0, import_react2.createElement)("div", { style: { ...styles.muted, marginTop: 8 } }, t("broadbandIntro")),
+      (0, import_react2.createElement)(
+        "div",
+        { role: "status", "aria-live": "polite" },
+        broadband?.error ? (0, import_react2.createElement)("div", { style: { ...styles.warn, marginTop: 8 } }, t("broadbandFailed") + " " + errText(broadband.error)) : null,
+        !broadband && broadbandBusy ? (0, import_react2.createElement)("div", { style: styles.muted }, t("broadbandLoading")) : null
+      ),
+      broadband?.url && !broadband?.error ? (0, import_react2.createElement)(
+        "div",
+        null,
+        qrArea(broadband.qr, broadband.url, t("broadbandQrHint")),
+        (0, import_react2.createElement)(
+          "div",
+          { style: { display: "flex", flexWrap: "wrap", gap: 8 } },
+          (0, import_react2.createElement)("a", { href: broadband.url, target: "_blank", rel: "noreferrer", style: styles.btn }, t("broadbandOpen")),
+          (0, import_react2.createElement)("button", { style: styles.btn, onClick: async () => {
+            try {
+              await navigator.clipboard.writeText(broadband.url);
+              showToast(t("broadbandCopied"));
+            } catch {
+              showToast(t("broadbandCopyFailed"));
+            }
+          } }, t("broadbandCopy"))
+        ),
+        (0, import_react2.createElement)("div", { style: { ...styles.muted, marginTop: 8 } }, t("broadbandChecked") + " " + new Date(broadband.checkedAt).toLocaleString()),
+        status?.accessToken ? row(
+          t("broadbandPassword"),
+          customPin?.which === "broadband-public" ? null : (0, import_react2.createElement)(
+            "span",
+            { style: { display: "inline-flex", flexWrap: "wrap", gap: 8, alignItems: "center" } },
+            (0, import_react2.createElement)("code", null, status.accessToken),
+            (0, import_react2.createElement)("button", { style: styles.btn, onClick: () => setCustomPin({ which: "broadband-public", value: "", err: null }) }, t("customize"))
+          ),
+          customPin?.which === "broadband-public" ? customPinRow("public") : (0, import_react2.createElement)("div", { style: styles.muted }, t("broadbandPasswordHint"))
+        ) : null
+      ) : null,
+      (0, import_react2.createElement)("div", { style: { ...styles.muted, marginTop: 8 } }, t("broadbandRequirement"))
+    ),
+    // Tailscale：只有装了并登录同一 tailnet 才会出现（跨网点对点直连，比 cloudflared 快）
     status?.tailscaleUrl ? (0, import_react2.createElement)(
       "div",
       { style: styles.block },
@@ -2712,11 +2810,7 @@ function PocketSettingsTab({ rpcCall, t }) {
         (0, import_react2.createElement)("span", { style: { fontWeight: 600, fontSize: 13 } }, t("tailscaleAccess")),
         (0, import_react2.createElement)("span", { style: { fontSize: 11, color: "var(--dsw-alias-state-success-primary,#15803d)" } }, t("tailscaleP2P"))
       ),
-      (0, import_react2.createElement)(
-        "div",
-        null,
-        qrArea(status.tailscaleQr, status.tailscaleUrl, t("tailscaleHint"))
-      )
+      (0, import_react2.createElement)("div", null, qrArea(status.tailscaleQr, status.tailscaleUrl, t("tailscaleHint")))
     ) : null,
     // 公网：标题行自带 开启/关闭 → 开启后：二维码+地址、地址模式行、访问密码行
     (0, import_react2.createElement)(
@@ -2873,7 +2967,7 @@ function PocketSettingsTab({ rpcCall, t }) {
     ) : null,
     // Toast：重置等操作的即时反馈（固定屏幕正中央，2.6s 自动消失）
     toast ? (0, import_react2.createElement)("div", {
-      style: { position: "fixed", left: "50%", top: "50%", transform: "translate(-50%, -50%)", zIndex: 10001, width: "auto", maxWidth: 280, background: "rgba(17,24,39,.92)", color: "#fff", border: "none", borderRadius: 10, padding: "10px 16px", fontSize: 13, lineHeight: 1.5, textAlign: "center", boxShadow: "0 8px 24px rgba(0,0,0,.22)" }
+      style: { position: "fixed", left: "50%", top: "50%", transform: "translate(-50%, -50%)", zIndex: 10001, width: "auto", maxWidth: 280, background: "var(--dsw-alias-bg-layer-2)", color: "var(--dsw-alias-label-primary)", border: "1px solid var(--dsw-alias-border-l2)", borderRadius: 10, padding: "10px 16px", fontSize: 13, lineHeight: 1.5, textAlign: "center" }
     }, toast) : null,
     // 局域网访问开关确认弹框（关闭/打开时弹窗提醒）
     lanToggleOpen !== null ? (0, import_react2.createElement)(

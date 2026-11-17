@@ -1,5 +1,6 @@
-# dsh-pocket bundle patch（dsh.bundle manifest 要求的加载配置）
-# 单包单插件：装一次，设置页「手机访问」全部功能到位。
+# 本地增强版接替原有 Pocket，复用已有密码和设置。
+- id: dsh-pocket
+  disabled: true
 - insert:
-    - id: dsh-pocket
-      name: dsh-pocket
+    - id: dsh-pocket-broadband
+      name: dsh-pocket-broadband

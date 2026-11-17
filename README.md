@@ -1,3 +1,45 @@
+# dsh-pocket-broadband
+
+由 [ghost-xx](https://github.com/ghost-xx) 维护的宽带公网直连增强版，Fork 自 [Mrsirlila/dsh-pocket-plus](https://github.com/Mrsirlila/dsh-pocket-plus)，原始项目为 [shaobeichen/dsh-pocket](https://github.com/shaobeichen/dsh-pocket)。保留上游历史、作者署名及 GPL-2.0 许可证。
+
+## 本分支新增内容
+
+在 **设置 → 手机访问** 中独立显示“宽带公网直连”：
+
+- 由电脑宿主请求 `https://ddns.oray.com/checkip` 获取当前宽带公网 IPv4，不会误取手机自身的出口地址。
+- 设置页打开期间每分钟检查；支持手动刷新、二维码、打开和复制直连地址。
+- 使用实际代理端口，IP 不写死；失败时清除旧地址并提示重试。
+- 与 Cloudflare 隧道共用公网密码，关闭隧道仍可直连。宽带二维码不携带密码。
+- 宽带直连需要公网 IPv4、路由器端口映射及防火墙放行，入口使用 HTTP；查询到 IP 并不保证外网已连通。
+
+## 安装这个增强版
+
+在 DSH 的插件管理中添加 GitHub 安装来源：
+
+```text
+github:ghost-xx/dsh-pocket-broadband#path:/plugin
+```
+
+包名为 `dsh-pocket-broadband`。增强版包含完整插件功能；避免与原 `dsh-pocket` 同时运行。它复用原插件设置和密码，安装时可能重建 Cloudflare 随机隧道，请使用设置页当前地址。源码位于 [`plugin/`](plugin/)。未在 npm 发布。
+
+仓库根目录保留的 APK、旧 ZIP、PDF 和下方说明来自上游，**没有包含本次宽带功能**；安装增强版请使用上面的 GitHub 来源。
+
+## 开发与检查
+
+需要 Node.js 22+，在 `plugin/` 中运行：
+
+```sh
+pnpm install --ignore-scripts
+pnpm run build:client
+pnpm test
+```
+
+宽带查询的 7 项自动测试覆盖地址校验、缓存、刷新、并发、失败处理、超时和 RPC 门禁。真实 DSH 页面已验证宽带区、手动刷新、二维码和浅深色主题。代码不包含本机密码、Token 或运行配置。
+
+---
+
+以下为保留的上游项目说明与历史功能，涉及旧包名、安装源、发布物及自动扫码登录的内容以本页上方增强版说明为准。
+
 <div align="center">
 
 <img src="assets/icon.svg" width="84" alt="dsh-pocket-plus" />

@@ -1,0 +1,12 @@
+# Local dependencies and developer output
+node_modules/
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+coverage/
+# Pocket runtime state is never source code
+token
+token-lan
+settings.json

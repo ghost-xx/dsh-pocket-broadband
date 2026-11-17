@@ -1,6 +1,12 @@
-<p align="center">
-  <img src="docs/banner.jpg" alt="DSH Pocket" width="100%">
-</p>
+# DSH Pocket 宽带公网直连增强版
+
+在原有“手机访问”设置中新增“宽带公网直连”。由电脑宿主请求 `https://ddns.oray.com/checkip` 获取当前公网 IPv4，组合实际代理端口并生成无密码二维码。设置页打开时每分钟自动检查，也可点“刷新公网 IP”。查询失败会清除旧地址并提示重试，不会把 IP 固定保存。
+
+支持打开、复制地址和修改共用公网密码。宽带直连不依赖 Cloudflare 隧道，但需要公网 IPv4、端口转发与防火墙放行；入口为 HTTP。查到 IP 不代表已验证外网可达。
+
+此本地增强版接替原 Pocket 运行，复用既有密码与设置。安装后隧道可能自动重新创建，应以设置页当前显示的随机域名为准。保留以下原项目文档和 GPL-2.0 许可证。
+
+---
 
 <h1 align="center">DSH Pocket</h1>
 

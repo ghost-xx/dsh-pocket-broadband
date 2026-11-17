@@ -52,6 +52,9 @@ function applyMobileRightbarSetting(enabled) {
 
 function PocketSettingsTab({ rpcCall, t }) {
   const [status, setStatus] = useState(null);
+  const [broadband, setBroadband] = useState(null);
+  const [broadbandBusy, setBroadbandBusy] = useState(false);
+  const broadbandInFlight = useRef(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [tunnelState, setTunnelState] = useState(null); // 隧道进度 {phase, detail, startedAt}
@@ -72,6 +75,25 @@ function PocketSettingsTab({ rpcCall, t }) {
     if (!res?.ok) throw new Error(res?.error?.message ?? 'RPC failed');
     return res.value;
   };
+
+  const loadBroadband = async (refresh = false) => {
+    if (broadbandInFlight.current) return;
+    broadbandInFlight.current = true;
+    setBroadbandBusy(true);
+    try {
+      setBroadband(await call(refresh ? 'broadband/refresh' : 'broadband/status', {}));
+    } catch (err) {
+      setBroadband({ error: err?.message || 'RPC failed' });
+    } finally {
+      broadbandInFlight.current = false;
+      setBroadbandBusy(false);
+    }
+  };
+  useEffect(() => {
+    loadBroadband();
+    const timer = setInterval(() => loadBroadband(), 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   const load = async () => {
     try {
@@ -324,7 +346,7 @@ function PocketSettingsTab({ rpcCall, t }) {
   const customPinRow = (which) => h('div', { style: { marginTop: 6, fontSize: 12, color: 'var(--dsw-alias-label-secondary,#6b7280)', lineHeight: 1.5 } },
     t('customizing'),
     h('input', {
-      style: { width: 130, margin: '0 6px', padding: '4px 8px', fontSize: 14, letterSpacing: 1, textAlign: 'center', border: '1px solid var(--dsw-alias-border-l2,#d1d5db)', borderRadius: 6, outline: 'none' },
+      style: { width: 130, margin: '0 6px', padding: '4px 8px', fontSize: 14, letterSpacing: 1, textAlign: 'center', border: '1px solid var(--dsw-alias-border-l2)', borderRadius: 6, background: 'var(--dsw-alias-bg-layer-1)', color: 'var(--dsw-alias-label-primary)', outlineColor: 'var(--dsw-alias-brand-primary)' },
       type: 'password',
       minLength: 8,
       maxLength: 64,
@@ -488,6 +510,32 @@ function PocketSettingsTab({ rpcCall, t }) {
           : h('div', { style: styles.muted }, t('lanStarting'))),
     ),
 
+    // 宽带地址由宿主查询，避免显示手机自身的出口 IP。
+    h('section', { style: styles.block, 'aria-label': t('broadbandTitle') },
+      h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 } },
+        h('strong', { style: { fontSize: 13 } }, t('broadbandTitle')),
+        h('button', { style: styles.btn, disabled: broadbandBusy, onClick: () => loadBroadband(true) }, broadbandBusy ? t('broadbandLoading') : t('broadbandRefresh'))),
+      h('div', { style: { ...styles.muted, marginTop: 8 } }, t('broadbandIntro')),
+      h('div', { role: 'status', 'aria-live': 'polite' },
+        broadband?.error ? h('div', { style: { ...styles.warn, marginTop: 8 } }, t('broadbandFailed') + ' ' + errText(broadband.error)) : null,
+        !broadband && broadbandBusy ? h('div', { style: styles.muted }, t('broadbandLoading')) : null),
+      broadband?.url && !broadband?.error ? h('div', null,
+        qrArea(broadband.qr, broadband.url, t('broadbandQrHint')),
+        h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 8 } },
+          h('a', { href: broadband.url, target: '_blank', rel: 'noreferrer', style: styles.btn }, t('broadbandOpen')),
+          h('button', { style: styles.btn, onClick: async () => {
+            try { await navigator.clipboard.writeText(broadband.url); showToast(t('broadbandCopied')); }
+            catch { showToast(t('broadbandCopyFailed')); }
+          } }, t('broadbandCopy'))),
+        h('div', { style: { ...styles.muted, marginTop: 8 } }, t('broadbandChecked') + ' ' + new Date(broadband.checkedAt).toLocaleString()),
+        status?.accessToken ? row(t('broadbandPassword'),
+          customPin?.which === 'broadband-public' ? null : h('span', { style: { display: 'inline-flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' } },
+            h('code', null, status.accessToken), h('button', { style: styles.btn, onClick: () => setCustomPin({ which: 'broadband-public', value: '', err: null }) }, t('customize'))),
+          customPin?.which === 'broadband-public' ? customPinRow('public') : h('div', { style: styles.muted }, t('broadbandPasswordHint'))) : null,
+      ) : null,
+      h('div', { style: { ...styles.muted, marginTop: 8 } }, t('broadbandRequirement')),
+    ),
+
     // Tailscale：只有装了并登录同一 tailnet 才会出现（跨网点对点直连，比 cloudflared 快）
     status?.tailscaleUrl ? h('div', { style: styles.block },
       h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
@@ -618,7 +666,7 @@ function PocketSettingsTab({ rpcCall, t }) {
 
     // Toast：重置等操作的即时反馈（固定屏幕正中央，2.6s 自动消失）
     toast ? h('div', {
-      style: { position: 'fixed', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', zIndex: 10001, width: 'auto', maxWidth: 280, background: 'rgba(17,24,39,.92)', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 16px', fontSize: 13, lineHeight: 1.5, textAlign: 'center', boxShadow: '0 8px 24px rgba(0,0,0,.22)' },
+      style: { position: 'fixed', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', zIndex: 10001, width: 'auto', maxWidth: 280, background: 'var(--dsw-alias-bg-layer-2)', color: 'var(--dsw-alias-label-primary)', border: '1px solid var(--dsw-alias-border-l2)', borderRadius: 10, padding: '10px 16px', fontSize: 13, lineHeight: 1.5, textAlign: 'center' },
     }, toast) : null,
 
     // 局域网访问开关确认弹框（关闭/打开时弹窗提醒）

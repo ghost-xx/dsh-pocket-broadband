@@ -10,6 +10,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { POCKET_RPC_CHANNEL, POCKET_ENDPOINTS, redactStatus } from '../client/api.js';
+import { createBroadbandStatus } from './broadband.mjs';
 
 /** 单次读取上限：4 MB，避免把大文件塞进剪贴板 / 内存。 */
 const FILE_READ_MAX = 4 * 1024 * 1024;
@@ -268,6 +269,7 @@ export function killHint(port) {
  * 不可用时回退 ctx.connection.rpc.handle（旧版 dsh 兼容路径）。
  * wire 协议两条路径完全一致：client-request → handler → server-response。 */
 export function installPocketRpc(ctx, { service, log = console, desktop = false, runUpdate = null, restart = null, restartNotice = null, getToken = null, getLanToken = null, refreshLanToken = null, getLanAuthEnabled = null, setLanAuthEnabled = null, getLanEnabled = null, setLanEnabled = null, getMobileRightbarEnabled = null, setMobileRightbarEnabled = null, getLanIpOverride = null, setLanIpOverride = null, getPinCustom = null, setCustomPin = null, getTunnelConfig = null, setTunnelConfig = null, resetPocket = null }) {
+  const broadband = createBroadbandStatus({ service });
   const pocketRpcHandler = async (endpoint, payload = {}, signal) => {
     if (signal?.aborted) return fail('cancelled', 'The request was cancelled.');
 
@@ -293,6 +295,9 @@ export function installPocketRpc(ctx, { service, log = console, desktop = false,
     };
 
     try {
+      if (endpoint === 'broadband/status' || endpoint === 'broadband/refresh') {
+        return ok(await broadband.status({ refresh: endpoint === 'broadband/refresh' }));
+      }
       if (endpoint === POCKET_ENDPOINTS.status) {
         return await statusPayload();
       }
